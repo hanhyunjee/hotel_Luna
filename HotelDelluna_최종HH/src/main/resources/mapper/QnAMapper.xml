@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.HH.mybatis.mapper.QnAMapper">
+
+	  <insert id="QnAInsert" parameterType="QnADTO">
+            INSERT INTO QnA (q_no,q_title,q_detail,q_writer,q_date) VALUES (seq_q_no.nextval,#{q_title},#{q_detail},#{q_writer},sysdate)
+      </insert>       
+       
+       
+       <!-- 기웅씨 변경 -->
+      <select id="selectQnA" resultType="QnADTO" parameterType="hashMap"> 
+      		<![CDATA[
+      			SELECT * FROM (
+					SELECT 
+						ROWNUM as recNum,
+						 q_no,
+						 q_title,
+						 q_detail,
+						 q_writer,
+						 q_date,
+						 q_count 
+					FROM QnA
+		           )
+				where recNum between(#{section}-1)*100+(#{pageNum}-1)*10+1 and (#{section}-1)*100+#{pageNum}*10                         
+   	    ]]>
+      </select> 
+       
+       <!-- 기웅씨 추가 -->
+      <select id="totalQnA"   resultType="int">
+		<![CDATA[  
+			select count(q_no) from QnA
+		 ]]>	
+		</select>
+       
+      <select id="QnAList" resultType="QnADTO" parameterType="hashMap"> 
+           SELECT q_no,q_title,q_detail,q_writer,q_date,q_count FROM QnA
+            <trim prefix="WHERE" prefixOverrides="AND|OR">
+               <if test="Search == 'SearchSearch' and Searchtext !=null and Searchtext !=''">
+                        AND  q_no LIKE '%'|| #{Searchtext} || '%'
+                </if>
+                <if test="Search == 'TitleSearch' and Searchtext !=null and Searchtext!=''">
+                         AND q_title LIKE '%'|| #{Searchtext} || '%'
+                </if>
+                <if test="Search == 'ContentSearch' and Searchtext !=null and Searchtext!=''">
+                      AND q_detail LIKE '%'|| #{Searchtext} || '%'
+                </if>
+            </trim>
+            ORDER BY q_no DESC
+            <!-- where rownum >= ${start-1} and rownum <= #{end} -->
+            <!-- LIMIT ${start-1},#{end} -->
+      </select>
+      
+      <update id="QnACountUpdate" parameterType="int">
+            UPDATE QnA SET q_count = q_count +1 WHERE q_no=#{q_no}
+      </update>
+      
+      <select id="SelectQnA" resultType="QnADTO" parameterType="int">
+            SELECT * FROM QnA WHERE q_no = #{q_no}
+      </select>
+      
+      
+      <!-- 기존 CONCAT('%',#{Searchtext},'%') -->
+      <!-- 변경 '%'|| #{Searchtext} || '%' -->
+      <select id="SelectCount" resultType="int" parameterType="hashMap">
+               SELECT count(*) FROM QnA
+               <trim prefix="WHERE" prefixOverrides="AND|OR">
+               
+               <if test="Searchtext !=null and Searchtext !='' ">
+               <if test="Search=='SearchSearch'">
+                AND q_no LIKE '%'|| #{Searchtext} || '%'
+               </if>
+                 <if test="Search == 'TitleSearch'">
+                AND q_title LIKE '%'|| #{Searchtext} || '%' 
+               </if>
+               <if test="Search == 'ContentSearch'">
+                AND q_detail LIKE '%'|| #{Searchtext} || '%'
+               </if>
+                </if>
+               </trim>
+      </select>
+      
+      <delete id="QnADelete" parameterType="int">
+      DELETE FROM QnA WHERE q_no =#{q_no}
+      </delete>
+      
+      <!-- sysdate 수정 -->
+      <update id="QnAModify" parameterType="QnADTO">
+
+      UPDATE QnA SET q_title=#{q_title},q_detail=#{q_detail},q_date=sysdate WHERE q_no=#{q_no}
+
+      </update>
+
+</mapper>

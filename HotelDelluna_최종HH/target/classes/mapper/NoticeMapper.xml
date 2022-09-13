@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.HH.mybatis.mapper.NoticeMapper">
+
+<!--  현서 초기변경
+      <insert id="NoticeInsert" parameterType="NoticeDTO">
+    	<selectKey resultType="int" keyProperty="b_no" order="BEFORE">
+	    	select seq_b_no.nextval from dual 
+	    </selectKey>
+	     <![CDATA[
+            INSERT INTO notice (b_no,b_title,b_detail,b_writer,b_date) VALUES (seq_b_no.nextval,#{b_title},#{b_detail},#{b_writer},sysdate)
+          ]]>
+      </insert>
+       -->
+       
+      <!-- 현서 시퀀스 추가 최종 -->
+      <!-- b_no, seq_b_no.nextval 추가  --> 
+	  <insert id="NoticeInsert" parameterType="NoticeDTO">
+            INSERT INTO notice (b_no,b_title,b_detail,b_writer,b_date) VALUES (seq_b_no.nextval,#{b_title},#{b_detail},#{b_writer},sysdate)
+      </insert>       
+       
+       <!-- 기웅씨 변경 -->
+      <select id="selectNotice" resultType="NoticeDTO" parameterType="hashMap"> 
+      		<![CDATA[
+      			SELECT * FROM (
+						SELECT 
+							ROWNUM as recNum,
+							 b_no,
+							 b_title,
+							 b_detail,
+							 b_writer,
+							 b_date,
+							 b_count 
+						FROM notice
+			           )
+				where recNum between(#{section}-1)*100+(#{pageNum}-1)*10+1 and (#{section}-1)*100+#{pageNum}*10                         
+   	    ]]>
+      </select> 
+       
+       <!-- 기웅씨 추가 -->
+      <select id="totalNotice" resultType="int">
+		<![CDATA[  
+			select count(b_no) from notice
+		 ]]>	
+		</select>
+       
+      <select id="NoticeList" resultType="NoticeDTO" parameterType="hashMap"> 
+           SELECT b_no,b_title,b_detail,b_writer,b_date,b_count FROM notice
+            <trim prefix="WHERE" prefixOverrides="AND|OR">
+               <if test="Search == 'SearchSearch' and Searchtext !=null and Searchtext !=''">
+                        AND  b_no LIKE '%'|| #{Searchtext} || '%'
+                </if>
+                <if test="Search == 'TitleSearch' and Searchtext !=null and Searchtext!=''">
+                         AND b_title LIKE '%'|| #{Searchtext} || '%'
+                </if>
+                <if test="Search == 'ContentSearch' and Searchtext !=null and Searchtext!=''">
+                      AND b_detail LIKE '%'|| #{Searchtext} || '%'
+                </if>
+            </trim>
+            ORDER BY b_no DESC
+            <!-- where rownum >= ${start-1} and rownum <= #{end} -->
+            <!-- LIMIT ${start-1},#{end} -->
+      </select>
+      
+      <update id="NoticeCountUpdate" parameterType="int">
+            UPDATE notice SET b_count = b_count +1 WHERE b_no=#{b_no}
+      </update>
+      
+      <select id="SelectNotice" resultType="NoticeDTO" parameterType="int">
+            SELECT * FROM notice WHERE b_no = #{b_no}
+      </select>
+      
+      
+      <!-- 기존 CONCAT('%',#{Searchtext},'%') -->
+      <!-- 변경 '%'|| #{Searchtext} || '%' -->
+      <select id="SelectCount" resultType="int" parameterType="hashMap">
+               SELECT count(*) FROM notice 
+               <trim prefix="WHERE" prefixOverrides="AND|OR">
+               
+               <if test="Searchtext !=null and Searchtext !='' ">
+               <if test="Search=='SearchSearch'">
+                AND b_no LIKE '%'|| #{Searchtext} || '%'
+               </if>
+                 <if test="Search == 'TitleSearch'">
+                AND b_title LIKE '%'|| #{Searchtext} || '%' 
+               </if>
+               <if test="Search == 'ContentSearch'">
+                AND b_detail LIKE '%'|| #{Searchtext} || '%'
+               </if>
+                </if>
+               </trim>
+      </select>
+      
+      <delete id="NoticeDelete" parameterType="int">
+      DELETE FROM notice WHERE b_no =#{b_no}
+      </delete>
+      
+      <!-- sysdate 수정 -->
+      <update id="NoticeModify" parameterType="NoticeDTO">
+      UPDATE notice SET b_title=#{b_title},b_detail=#{b_detail},b_date=sysdate WHERE b_no=#{b_no}
+      </update>
+      
+</mapper>
