@@ -1,0 +1,1 @@
+INSERT INTO QnA (q_no,q_title,q_detail,q_writer,q_date) select seq_q_no.nextval,q_title,q_detail,q_writer,q_date from QnA;
