@@ -78,7 +78,7 @@
 
                             <div class="form-process"></div>
 
-<                             <div class="col_one_third">
+                            <div class="col_one_third">
                                 <label for="template-contactform-name">작성자 <small>*</small></label>
                                 <input type="text" id="template-contactform-name" name="q_writer" value="${m_id}" class="sm-form-control required" readonly="readonly"/>
                             </div> 
